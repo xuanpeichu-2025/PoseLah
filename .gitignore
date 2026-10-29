@@ -147,3 +147,9 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Vercel deployment folder
+.vercel
+
+# macOS junk files
+.DS_Store

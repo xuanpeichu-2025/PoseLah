@@ -100,8 +100,8 @@ export default function Home() {
           return;
         }
         streamRef.current = stream;
-                const s = stream.getVideoTracks()[0].getSettings();
-        setRes(`${s.width}×${s.height}`);
+        const s = stream.getVideoTracks()[0].getSettings();
+        setRes(s.width && s.height ? `${s.width}×${s.height}` : "");
         if (videoRef.current) videoRef.current.srcObject = stream;
         setError("");
       } catch (e) {

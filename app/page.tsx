@@ -75,6 +75,7 @@ export default function Home() {
   const streamRef = useRef<MediaStream | null>(null);
   const [facing, setFacing] = useState<Facing>("environment");
   const [error, setError] = useState("");
+  const [res, setRes] = useState("");
   const [heading, setHeading] = useState<number | null>(null); // back camera
   const [tilt, setTilt] = useState<number | null>(null); // back camera
   const [target, setTarget] = useState<Target | null>(null);
@@ -86,7 +87,12 @@ export default function Home() {
     async function start() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: facing } },
+          video: {
+            facingMode: { ideal: facing },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 30 },
+          },
           audio: false,
         });
         if (cancelled) {
@@ -94,6 +100,8 @@ export default function Home() {
           return;
         }
         streamRef.current = stream;
+                const s = stream.getVideoTracks()[0].getSettings();
+        setRes(`${s.width}×${s.height}`);
         if (videoRef.current) videoRef.current.srcObject = stream;
         setError("");
       } catch (e) {
@@ -189,7 +197,7 @@ export default function Home() {
         <span className="tabular-nums text-white/60">
           {camHeading === null || camTilt === null
             ? "no sensors"
-            : `${camHeading.toFixed(0)}° · ${camTilt.toFixed(0)}°`}
+            : `${res} · ${camHeading.toFixed(0)}° · ${camTilt.toFixed(0)}°`}
         </span>
       </div>
 

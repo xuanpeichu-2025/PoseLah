@@ -8,6 +8,7 @@ type Dir = "left" | "right" | "up" | "down";
 
 const TOLERANCE = 5; // degrees allowed on each axis
 const ARROWS_ON_FAR_SIDE = true; // false = arrow sits on the side it points to
+const MIRROR_SELFIE_ARROWS = true; // false = show the camera's true left/right in selfie mode
 
 const ROTATION: Record<Dir, number> = { right: 0, down: 90, left: 180, up: 270 };
 const OPPOSITE: Record<Dir, Dir> = { left: "right", right: "left", up: "down", down: "up" };
@@ -139,6 +140,9 @@ export default function Home() {
   const tiltDir: Dir | null =
     guide && Math.abs(guide.dPitch) >= TOLERANCE ? (guide.dPitch > 0 ? "up" : "down") : null;
   const onTarget = guide !== null && turnDir === null && tiltDir === null;
+    // In selfie mode the preview is mirrored, so flip left/right to match what the user sees.
+  const flip = facing === "user" && MIRROR_SELFIE_ARROWS;
+  const shownTurnDir: Dir | null = turnDir && flip ? OPPOSITE[turnDir] : turnDir;
 
   const sideOf = (d: Dir): Dir => (ARROWS_ON_FAR_SIDE ? OPPOSITE[d] : d);
   const strength = (delta: number) => Math.min(Math.abs(delta) / 45, 1);
@@ -190,9 +194,9 @@ export default function Home() {
       </div>
 
       {/* Edge arrows */}
-      {turnDir && guide && (
-        <div className={`pointer-events-none absolute ${EDGE_POSITION[sideOf(turnDir)]}`}>
-          <Chevrons dir={turnDir} strength={strength(guide.dYaw)} />
+            {shownTurnDir && guide && (
+        <div className={`pointer-events-none absolute ${EDGE_POSITION[sideOf(shownTurnDir)]}`}>
+          <Chevrons dir={shownTurnDir} strength={strength(guide.dYaw)} />
         </div>
       )}
       {tiltDir && guide && (
@@ -234,7 +238,7 @@ export default function Home() {
               ? error
               : onTarget
                 ? "Hold it there"
-                : instruction(guide!.dYaw, guide!.dPitch)}
+                : instruction(flip ? -guide!.dYaw : guide!.dYaw, guide!.dPitch)}
           </div>
         </div>
       )}
